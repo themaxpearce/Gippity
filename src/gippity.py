@@ -4,6 +4,23 @@ import datetime
 
 class Gippity(commands.Bot):
 
+    # Override commands.Bot setup hook to allow for extra data to load before setup
+    async def setup_hook(self):
+        print("Hello")
+
+    ###################
+    # SETUP FUNCTIONS #
+    ###################
+    
+    # Used to load guild and channel config
+    async def load_configs(self):
+        print("Loading guild and channel configs to memory")
+    
+
+    ######################
+    # CORE FUNCTIONALITY #
+    ######################
+
     # Used to get instructions from added context
     # Modify to customise instructions GLOBALLY
     # Some options can be passed to msg_ctx to customise certain parameters per guild
@@ -44,6 +61,10 @@ class Gippity(commands.Bot):
 
         return instructions
 
+
+    ####################
+    # HELPER FUNCTIONS #
+    ####################
 
     # Format message time to standard format
     def formatTime(self, sent: datetime.datetime):

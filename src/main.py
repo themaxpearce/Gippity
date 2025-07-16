@@ -5,6 +5,8 @@ import os
 from dotenv import load_dotenv
 from interface import Responder
 
+from cogs.admin import Admin
+
 load_dotenv()
 
 bot_token = os.getenv("bot_token")
@@ -17,8 +19,13 @@ intents.guilds = True
 intents.members = True
 #intents.mentions = True
 
+# Set up bot
 client = Gippity(command_prefix="g!", intents=intents)
+
+# Grab AI interface
 responder = Responder(ai_key)
+
+
 
 @client.event
 async def on_ready():
@@ -32,6 +39,8 @@ async def sync(interaction: discord.Interaction):
 
         print("Tree has synced")
 
+# Brunt of work done is handled through simply processing a message
+# In future, may add slash commands to extend functionality
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -50,6 +59,10 @@ async def on_message(message):
 async def main():
 
     async with client:
+        # Load Cogs
+        await client.add_cog(Admin(client))
+        
+        # Run Bot
         await client.start(bot_token)
 
 asyncio.run(main())
