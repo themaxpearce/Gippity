@@ -15,7 +15,52 @@ class Gippity(commands.Bot):
     # Used to load guild and channel config
     async def load_configs(self):
         print("Loading guild and channel configs to memory")
-    
+        
+        # Store configs into memory
+        self._guild_config = {}
+
+    async def load_config_for_guild(self, guild: discord.Guild):
+       
+        # guild_config[guildid] will hold all config data relevant to guild
+        # "channels" and "global" distinguish between individual channel config and guild-wide config
+        self._guild_config[guild.id] = {
+                ["channels"]:{},
+                ["global"]:{},
+                }
+
+    async def addConfigToObject(self, discordObject, option, config):
+        if type(discordObject) == discord.Guild:
+            print("Adding config to guild")
+        elif type(discordObject) == discord.TextChannel:
+            print("Adding config to text channel")
+        else:
+            print("Whoops! Can't config here :/")
+        return
+
+    async def getObjectConfig(self, discordObject):
+        
+        if type(discordObject) == discord.Guild:
+            if discordObject.id in self._guild_config:
+                return self._guild_config[guild.id]["global"]
+
+        elif type(discordObject) == discord.TextChannel:
+            # If channel guild is configured
+            if discordObject.guild.id in self._guild_config:
+                # If channel is configured within said guild
+                if discordObject.id in self._guild_config[discordObject.guild.id]["channels"]:
+                    return self._guild_config[discordObject.guild.id]["channels"][discordObject.id]
+
+        return None 
+
+    async def getObjectConfigOption(self, discordObject, option):
+        
+        objectConfig = self.getObjectConfig(discordObject)
+        if objectConfig is not None:
+            if option in objectConfig:
+                return objectConfig[option]
+        
+        return None
+
 
     ######################
     # CORE FUNCTIONALITY #
