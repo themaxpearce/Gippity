@@ -7,7 +7,7 @@ class Gippity(commands.Bot):
     # Override commands.Bot setup hook to allow for extra data to load before setup
     async def setup_hook(self):
         print("Hello")
-
+        await self.load_configs()
     ###################
     # SETUP FUNCTIONS #
     ###################
@@ -23,26 +23,62 @@ class Gippity(commands.Bot):
        
         # guild_config[guildid] will hold all config data relevant to guild
         # "channels" and "global" distinguish between individual channel config and guild-wide config
-        self._guild_config[guild.id] = {
-                ["channels"]:{},
-                ["global"]:{},
-                }
+        self._guild_config[guild.id] = {"channels":{}, "global":{}}                
 
     async def addConfigToObject(self, discordObject, option, config):
-        if type(discordObject) == discord.Guild:
-            print("Adding config to guild")
-        elif type(discordObject) == discord.TextChannel:
-            print("Adding config to text channel")
+        
+
+        # First get old config
+        newConfig = await self.getObjectConfigOption(discordObject, option)
+        if newConfig is None:
+
+            # No need to worry about 
+            newConfig = config
+
+        elif option in ["instructions"]:
+            newConfig.append(option)
+
         else:
-            print("Whoops! Can't config here :/")
-        return
+            newConfig = config
+        
+
+    
+        if type(discordObject) == discord.Guild:
+
+            # If guild global config not loaded
+            if discordObject.id not in self._guild_config:
+                # Load it!
+                await self.load_config_for_guild(discordObject)
+
+            self._guild_config[discordObject.id]["global"][option] = newConfig
+
+
+        elif type(discordObject) == discord.TextChannel:
+            
+            # If guild hasn't been loaded yet (somehow)
+            if discordObject.guild.id not in self._guild_config:
+                # Load it
+                await load_config_for_guild(self, discordObject.guild)
+
+            # If channel not yet configured
+            if discordObject.id not in self._guild_config[discordObject.guild.id]["channels"]:
+                # Create empty dict for it
+                self._guild_config[discordObject.guild.id]["channels"][discordObject.id] = {}
+
+            # Finally set key
+            self._guild_config[discordObject.guild.id]["channels"][discordObject.id][option] = newConfig
+
+        else:
+            return False
+
+        return True
 
     async def getObjectConfig(self, discordObject):
         
         if type(discordObject) == discord.Guild:
             if discordObject.id in self._guild_config:
-                return self._guild_config[guild.id]["global"]
-
+                return self._guild_config[discordObject.id]["global"]
+                                            
         elif type(discordObject) == discord.TextChannel:
             # If channel guild is configured
             if discordObject.guild.id in self._guild_config:
@@ -54,7 +90,7 @@ class Gippity(commands.Bot):
 
     async def getObjectConfigOption(self, discordObject, option):
         
-        objectConfig = self.getObjectConfig(discordObject)
+        objectConfig = await self.getObjectConfig(discordObject)
         if objectConfig is not None:
             if option in objectConfig:
                 return objectConfig[option]
