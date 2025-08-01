@@ -51,6 +51,9 @@ class Admin(commands.Cog):
             title="Config",
             description=f"Current config for {obj.name}"
             )
+            
+            for key in config:
+                embed.add_field(name=key, value=config[key])
 
             await interaction.response.send_message(embed=embed)
 

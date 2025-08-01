@@ -33,10 +33,13 @@ class Gippity(commands.Bot):
         if newConfig is None:
 
             # No need to worry about 
+            if option in ["instructions"]:
+                config = [config]
+
             newConfig = config
 
         elif option in ["instructions"]:
-            newConfig.append(option)
+            newConfig.append(config)
 
         else:
             newConfig = config
@@ -139,6 +142,15 @@ class Gippity(commands.Bot):
         msg_ctx["datetime"] = message.created_at
 
         instructions = await self.genInstructions(msg_ctx)
+            
+        guildInstructions = await self.getObjectConfigOption(message.guild, "instruction")
+        channelInstructions = await self.getObjectConfigOption(message.channel, "instruction")
+
+        if guildInstructions is not None:
+            instructions += guildInstructions
+
+        if channelInstructions is not None:
+            instructions += channelInstructions
 
         return instructions
 
