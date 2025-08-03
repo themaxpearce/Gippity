@@ -29,6 +29,12 @@ responder = Responder(ai_key)
 
 @client.event
 async def on_ready():
+    if not os.path.exists("flag"):
+        print("Flag does not exist. Running first-time setup")
+        with open("flag", "w+") as file:
+            file.close()
+        await client.tree.sync()
+
     print("Bot Ready")
 
 @client.tree.command(name="sync", description="Owner only command")
